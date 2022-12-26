@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QDir>
 #include <QDateTime>
+#include <QHash>
 #include <QtQml/qqmlregistration.h>
 
 #include <stdexcept>
@@ -14,10 +15,10 @@ class FileChangeMonitor : public QObject {
 		           READ interval
 		           WRITE setInterval
 		           NOTIFY intervalChanged)
-		Q_PROPERTY(bool run
-		           READ run
-		           WRITE setRun
-		           NOTIFY runChanged)
+		Q_PROPERTY(bool running
+		           READ running
+		           WRITE setRunning
+		           NOTIFY runningChanged)
 		Q_PROPERTY(QString path
 		           READ path
 		           WRITE setPath
@@ -28,8 +29,8 @@ class FileChangeMonitor : public QObject {
 
 		int interval() const;
 		void setInterval(const int &value);
-		bool run() const;
-		void setRun(const bool &value);
+		bool running() const;
+		void setRunning(const bool &value);
 		QString path() const;
 		void setPath(const QString &path);
 
@@ -37,18 +38,35 @@ class FileChangeMonitor : public QObject {
 		// QAbstractListModel methods.
 
 	signals:
-		void monitoredFileChanged();
+		void filesChanged();
 		void intervalChanged();
-		void runChanged();
+		void runningChanged();
 		void pathChanged();
+
+	protected:
+		void timerEvent(QTimerEvent *event) override;
 
 	private:
 		int _interval = 1000;
-		bool _run = false;
+		bool _running = false;
+		// TODO: add selectable filters.
+		const QStringList _filters{"*.html", "*.css", "*.js"};
 		QDir _directory;
-		int _timestamp = 0;
+		QHash<QString, QDateTime> _timestamps;
 
-		void sortFiles();
+		int _timerID = 0;
+
+		void startChangeTimer();
+		void stopChangeTimer();
+		void adjustTimerToState();
+
+		// Populates _timestamps with entries from _directory.
+		void populateTimestamps();
+		// Removes all entries from _timestamps.
+		void clearTimestamps();
+		// Iterate over _timestamps, compare saved modified time with the file's
+		// current last modified. If a file has been modified return true.
+		bool checkTimestamps();
 };
 
 #endif // FILECHANGEMONITOR_H
