@@ -4,8 +4,8 @@ import QtQuick.Layouts
 Row {
     id: root
 
-    signal refresh();
-    signal onTop();
+    property alias autoRefresh: refresh.active;
+    property alias alwaysOnTop: onTop.active;
 
     spacing: 4;
 
@@ -16,7 +16,8 @@ Row {
         width: height;
         icon: "qrc:/icons/refresh.svg"
 
-        onClicked: root.refresh();
+        onToggle: {
+        }
     }
     ControlButton {
         id: onTop
@@ -27,13 +28,7 @@ Row {
         width: height;
         icon: "qrc:/icons/onTop.svg"
 
-        onClicked: {
-            root.onTop();
-            onTop.activated = !onTop.activated;
-            if (onTop.activated)
-                onTop.state = "active"
-            else
-                onTop.state = "inactive"
+        onToggle: {
         }
     }
 

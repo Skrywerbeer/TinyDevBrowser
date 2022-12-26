@@ -4,8 +4,9 @@ Rectangle {
     id: root;
 
     property alias icon: btnIcon.source;
+    property bool active: false;
 
-    signal clicked;
+    signal toggle();
 
     border {width: 2; color: Qt.lighter("#fea75f");}
     state: "inactive";
@@ -17,18 +18,18 @@ Rectangle {
     MouseArea {
         id: mouseArea
         anchors.fill: parent
-        onClicked: root.clicked();
+        onClicked: {root.active = !root.active; root.toggle();}
     }
 
     states: [
         State {
             name: "active"
             PropertyChanges {target: root; border.color: "gray";}
-            when: mouseArea.pressed;
+            when: root.active;
         },
         State {
             name: "inactive"
-//            PropertyChanges {target: root; border.color: 1;}
+            when: !root.active;
         }
 
     ]

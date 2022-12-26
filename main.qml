@@ -2,6 +2,8 @@ import QtQuick
 import QtWebView
 import QtQuick.Layouts
 
+import tinyDevBrowser
+
 
 Window {
     id: root
@@ -11,6 +13,15 @@ Window {
     height: 600;
     width: 400;
     visible: true;
+    flags: controls.alwaysOnTop ? (Qt.Window | Qt.WindowStaysOnTopHint) :
+                                  (Qt.Window);
+
+
+    FileChangeMonitor {
+        id: monitor
+        running: controls.autoRefresh;
+        onFilesChanged: view.reload();
+    }
 
     ColumnLayout {
         anchors.fill: parent;
@@ -18,25 +29,16 @@ Window {
             Layout.fillWidth: true;
 
             Controls {
+                id: controls
                 Layout.preferredHeight: 32;
                 Layout.preferredWidth: 64
-
-                onRefresh: view.reload();
-                onOnTop: {
-                    console.log(root.flags);
-                    root.onTop = !root.onTop;
-                    if (root.onTop)
-                        root.flags = Qt.Window | Qt.WindowStaysOnTopHint;
-                    else
-                        root.flags = Qt.Window;
-                }
             }
             AddressBar {
                 id: addressBar;
                 loadProgress: view.loadProgress;
                 Layout.fillWidth: true;
                 Layout.preferredHeight: 32;
-                onUrlFinished: view.url = newUrl;
+                onUrlFinished: (newUrl) => {view.url = newUrl;}
             }
         }
         Rectangle {
@@ -50,7 +52,15 @@ Window {
 
                 anchors.fill: parent;
 
-                onUrlChanged: addressBar.url = url;
+                onUrlChanged: {
+                    // TODO: do a better check of the passed url.
+                    const SCHEME_END = 7;
+                    let asStr = view.url.toString();
+                    const endIndex = asStr.lastIndexOf("/")+1;
+                    monitor.path = asStr.slice(SCHEME_END, endIndex);
+                    console.log(`watching: ${monitor.path}`);
+                    addressBar.url = view.url;
+                }
             }
         }
     }
