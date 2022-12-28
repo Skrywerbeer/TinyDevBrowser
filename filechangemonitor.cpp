@@ -74,10 +74,8 @@ void FileChangeMonitor::adjustTimerToState() {
 }
 
 void FileChangeMonitor::populateTimestamps() {
-	for (const auto &file : _directory.entryInfoList(_filters)) {
-		qDebug() << "adding: " << file.fileName();
+	for (const auto &file : _directory.entryInfoList(_filters))
 		_timestamps[file.fileName()] = file.lastModified();
-	}
 }
 
 void FileChangeMonitor::clearTimestamps() {
@@ -86,15 +84,10 @@ void FileChangeMonitor::clearTimestamps() {
 
 bool FileChangeMonitor::checkTimestamps() {
 	for (const auto &file : _directory.entryInfoList(_filters)) {
-		qDebug() << QString("checking: %1 previous: %2 current: %3")
-		            .arg(file.fileName())
-		            .arg(_timestamps.value(file.fileName()).toString())
-		            .arg(file.lastModified().toString());
 		if (_timestamps.value(file.fileName()) != file.lastModified()) {
 			_timestamps[file.fileName()] = file.lastModified();
 			return true;
 		}
 	}
-	qDebug() << "-----------------------";
 	return false;
 }
