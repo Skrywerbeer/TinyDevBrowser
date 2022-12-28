@@ -16,7 +16,6 @@ Window {
     flags: controls.alwaysOnTop ? (Qt.Window | Qt.WindowStaysOnTopHint) :
                                   (Qt.Window);
 
-
     FileChangeMonitor {
         id: monitor
         running: controls.autoRefresh;
@@ -38,7 +37,7 @@ Window {
                 loadProgress: view.loadProgress;
                 Layout.fillWidth: true;
                 Layout.preferredHeight: 32;
-                onUrlFinished: (newUrl) => {view.url = newUrl;}
+                onUrlChanged: () => {view.url = addressBar.url;}
             }
         }
         Rectangle {
@@ -58,7 +57,6 @@ Window {
                     let asStr = view.url.toString();
                     const endIndex = asStr.lastIndexOf("/")+1;
                     monitor.path = asStr.slice(SCHEME_END, endIndex);
-                    console.log(`watching: ${monitor.path}`);
                     addressBar.url = view.url;
                 }
             }
